@@ -6,20 +6,24 @@ import crypto from "crypto";
 import { Bucket } from "sst/node/bucket";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { ICustomMetadata } from "~/types/customMetadata";
 import { IApiResponse } from "~/types/apiResponseSchema";
 import { addressSchema } from "~/types/address";
 import geoCode from "~/utils/geo-coding";
 import { prisma } from "~/server/db";
-import { Post } from "@prisma/client";
+import { Image, Org, Post } from "@prisma/client";
 import getOrgId from "~/utils/getOrgId";
 
 const radius = 0.004
 
+type PostFull = {
+  org: Org,
+  images: Image[],
+} & Post
+
 export const postRouter = createTRPCRouter({
   signUrl: protectedProcedure
     .input(z.object({
-      imageNames: z.array(z.string()),
+      imageTypes: z.array(z.string()),
       postAs: z.enum(["user", "org"])
     }))
     .mutation(async ({ctx, input}) => {
@@ -28,20 +32,30 @@ export const postRouter = createTRPCRouter({
       if(input.postAs == "org"){
         const orgId = await getOrgId(ctx.auth.userId)
         if(!!!orgId){
-          return {status: "unauthorized"} as IApiResponse<null>
+          return { status: "unauthorized" } as IApiResponse<{signedUrls: string[], sources: string[]}>
         }
       }
       const s3 = new S3Client({})
-      const urls = await Promise.all(input.imageNames.map(async () => {
+      const urls = await Promise.all(input.imageTypes.map(async (imageType) => {
+        const key = `postImages/${id}-${crypto.randomUUID()}`
         const command = new PutObjectCommand({
           ACL: "public-read",
-          Key: `${id}-${crypto.randomUUID()}`,
+          Key: key,
           Bucket: Bucket.public.bucketName,
+          ContentType: imageType,
         });
-        const url = await getSignedUrl(s3, command);
-        return url
+        const signedUrl = await getSignedUrl(s3, command);
+        const source = `https://${Bucket.public.bucketName}.s3.ap-southeast-1.amazonaws.com/${key}}`;
+        return {signedUrl, source}
       }))
-      return {status: "success", data: urls} as IApiResponse<string[]>
+      const data: {
+        signedUrls: string[];
+        sources: string[];
+      } = {
+          signedUrls: urls.map(urlObj => urlObj.signedUrl),
+          sources: urls.map(urlObj => urlObj.source),
+      };
+      return {status: "success", data} as IApiResponse<{signedUrls: string[], sources: string[]}>
     }),
   create: protectedProcedure
     .input(z.object({
@@ -58,7 +72,7 @@ export const postRouter = createTRPCRouter({
       if(input.postAs == "org"){
         const orgId = await getOrgId(ctx.auth.userId)
         if(!!!orgId){
-          return {status: "unauthorized"} as IApiResponse<null>
+          return { status: "unauthorized" } as IApiResponse<Post>
         }
         createPost = await prisma.post.create({
           data: {
@@ -107,12 +121,17 @@ export const postRouter = createTRPCRouter({
       }
       return {status: "success", data: createPost} as IApiResponse<Post>
     }),
-  get: protectedProcedure
+  getMultiple: protectedProcedure
     .input(z.object({
-      lat: z.number(),
-      lon: z.number(),
-    }).optional())
+      lat: z.number().optional(),
+      lon: z.number().optional(),
+      limit: z.number().min(1).max(24).nullish(),
+      cursor: z.string().nullish(),
+      showHistory: z.boolean(),
+      orgId: z.string().optional()
+    }))
     .query(async ({input}) => {
+      const limit = input.limit ?? 12;
       const getPosts = await prisma.post.findMany({
         where: {
           lat: {
@@ -123,12 +142,47 @@ export const postRouter = createTRPCRouter({
             gt: input?.lon && (input?.lon - radius),
             lt: input?.lon && (input?.lon + radius),
           },
-        }
+          quantity: (input.showHistory ? undefined : {
+            gt: 0,
+          })
+        },
+        include: {
+          images: true,
+          org: true,
+        },
+        take: limit + 1,
+        cursor: input.cursor ? { id: input.cursor } : undefined,
       })
       if(getPosts.length < 1){
-        return {status: "error", } as IApiResponse<null>
+        return {status: "error", } as IApiResponse<{getPosts: PostFull[], nextCursor: string}>
       }
-      return {status: "success", data: getPosts} as IApiResponse<Post[]>
+      let nextCursor: typeof input.cursor | undefined = undefined;
+
+      if (getPosts.length > limit) {
+        const nextItem = getPosts.pop();
+        nextCursor = nextItem!.id;
+      }
+
+      return {status: "success", data: {getPosts, nextCursor}} as IApiResponse<{getPosts: PostFull[], nextCursor: string}>
+    }),
+  getOne: protectedProcedure
+    .input(z.object({
+      postId: z.string()
+    }))
+    .query(async ({input}) => {
+      const getPost = await prisma.post.findFirst({
+        where: {
+          id: input.postId
+        },
+        include: {
+          images: true,
+          org: true,
+        },
+      })
+      if(!!!getPost) {
+        return {status: "error"} as IApiResponse<PostFull>
+      }
+      return {status: "success", data: getPost} as IApiResponse<PostFull>
     })
 });
   

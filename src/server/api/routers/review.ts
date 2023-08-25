@@ -4,7 +4,6 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "~/server/db";
 import { IApiResponse } from "~/types/apiResponseSchema";
 import { Review } from "@prisma/client";

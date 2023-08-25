@@ -6,7 +6,21 @@ import Listings from "~/components/listings";
 import { api } from "~/utils/api";
 
 export default function Home() {
-  const hello = api.post.get.useQuery();
+  const {
+    data: posts,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = api.post.getMultiple.useInfiniteQuery(
+    {
+      limit: 10,
+      showHistory: false,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.data?.nextCursor,
+    }
+  );
   return (
     <div>
       <Listings />
