@@ -15,4 +15,24 @@ export default createNextApiHandler({
           );
         }
       : undefined,
+  responseMeta(opts) {
+        const { paths, errors, type } = opts;
+        // assuming you have all your public routes with the keyword `public` in them
+        const needCache =
+          paths && paths.every((path) => path.toLowerCase().includes("cache"));
+        // checking that no procedures errored
+        const allOk = errors.length === 0;
+        // checking we're doing a query request
+        const isQuery = type === "query";
+        if (needCache && allOk && isQuery) {
+          // cache request for 1 day + revalidate once every second
+          const ONE_HOUR_IN_SECONDS = 60 * 60;
+          return {
+            headers: {
+              "cache-control": `s-maxage=300, stale-while-revalidate=${ONE_HOUR_IN_SECONDS}`,
+            },
+          };
+        }
+        return {};
+      },
 });

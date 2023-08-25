@@ -6,12 +6,84 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
-model Example {
+model Org {
+    id          String        @id @default(cuid())
+    name        String
+    post        Post[]
+    inviteCodes InviteCodes[]
+    review      Review[]
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+}
+
+model Review {
+    id          String   @id @default(cuid())
+    org         Org      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+    orgId       String
+    userId      String
+    description String   @db.LongText
+    rating      Int
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([orgId])
+}
+
+model InviteCodes {
     id        String   @id @default(cuid())
+    code      String
+    org       Org      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+    orgId     String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([orgId])
+}
+
+model Post {
+    id          String      @id @default(cuid())
+    userId      String
+    ownerName   String?
+    description String      @db.LongText
+    org         Org?        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+    orgId       String?
+    images      Image[]
+    collected   Collected[]
+    quantity    Int
+    address     Json
+    lat         Int
+    lon         Int
+    bestBefore  DateTime
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+
+    @@index([orgId])
+}
+
+model Collected {
+    id        String   @id @default(cuid())
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId    String
+    userId    String
+    quantity  Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([postId])
+}
+
+model Image {
+    id        String   @id @default(cuid())
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId    String
+    url       String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([postId])
 }
