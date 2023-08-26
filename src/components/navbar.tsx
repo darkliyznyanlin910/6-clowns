@@ -31,8 +31,8 @@ const Navbar = () => {
           <Image
             src={"/icon.png"}
             alt={""}
-            width={80}
-            height={80}
+            width={63}
+            height={63}
             className="h-full w-auto py-2"
           />
         </Link>
@@ -40,7 +40,7 @@ const Navbar = () => {
       <ul className="nav-right flex h-full w-auto items-center space-x-5">
         <SignedIn>
           <li className="hidden w-auto items-center justify-center font-semibold md:flex">
-            <Link href={"/referral"} className="font-semibold">
+            <Link href={"/org/join"} className="font-semibold">
               <p>Are you a business? </p>
             </Link>
           </li>

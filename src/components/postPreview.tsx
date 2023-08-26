@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import TimeAgo from "react-timeago";
 import { PostFull } from "~/types/postFull";
+import { IAddress } from "~/types/address";
 import { useState } from "react";
 import { calculateDistance } from "~/utils/calculateDistance";
 
@@ -11,9 +12,10 @@ interface Props {
     lat: number;
     lon: number;
   } | null;
+  address: IAddress;
 }
 
-const PostPreview = ({ post, userCoordinate }: Props) => {
+const PostPreview = ({ post, userCoordinate, address }: Props) => {
   const [details, setDetails] = useState<boolean>(false);
   return (
     <div className="card-compact card mx-auto bg-base-100 shadow-xl md:card-side">
@@ -60,10 +62,10 @@ const PostPreview = ({ post, userCoordinate }: Props) => {
         <div>{post.description}</div>
         {details && (
           <p>
-            Location: {"Address"}
+            Location:
+            {address.line1 + ", " + address.unitNo + ", " + address.postal_code}
             <br />
             Quantity: {post.quantity} <br />
-            Best before: {"date"}
           </p>
         )}
         <div className="card-actions justify-between">

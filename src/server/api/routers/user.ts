@@ -4,7 +4,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "~/server/db";
 import { IApiResponse } from "~/types/apiResponseSchema";
 import { ICustomMetadata } from "~/types/customMetadata";
-import { Collected } from "@prisma/client";
+import { Collected, Org } from "@prisma/client";
 
 export const userRouter = createTRPCRouter({
   collected: protectedProcedure
@@ -53,14 +53,18 @@ export const userRouter = createTRPCRouter({
       })
       return {status: "success", data: {orgId: searchCode.code}} as IApiResponse<ICustomMetadata>
     }),
-  info: protectedProcedure
+  getOrg: protectedProcedure
     .query(async ({ctx}) => {
-      clerkClient.users.updateUserMetadata(ctx.auth.userId, {
-        privateMetadata: {
-          orgId: "cllrs52vn0000msmtu5blqvl8",
-        } as ICustomMetadata
-      })
       const data = await clerkClient.users.getUser(ctx.auth.userId)
-      return data
+      const { orgId } = data.privateMetadata as ICustomMetadata
+      if(!!!orgId){
+        return {status: "unauthorized"} as IApiResponse<Org>
+      }
+      const orgData = await prisma.org.findFirst({
+        where: {
+          id: orgId
+        }
+      })
+      return {status: "success", data: orgData} as IApiResponse<Org>
     })
 });
