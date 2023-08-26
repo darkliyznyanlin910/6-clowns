@@ -1,5 +1,4 @@
 import Link from "next/link";
-import {} from "./ui/navigation-menu";
 import {
   SignInButton,
   SignedIn,
@@ -14,36 +13,33 @@ const Navbar = () => {
   const test = router.pathname;
   const { user, isLoaded } = useUser();
   return (
-    <nav className="navbar fixed top-0 z-10 flex h-16 w-full items-center justify-between bg-[#fff0E3] px-4 py-2">
+    <nav className="navbar fixed top-0 z-10 flex h-16 w-full items-center justify-between px-4 py-2 shadow-md">
       <div className="nav-left flex h-full w-auto">
         <SignedIn>
           <li className="flex h-full w-auto items-center justify-center">
             <UserButton />
           </li>
           {isLoaded && (
-            <li className=" hidden h-full w-auto items-center justify-center pl-2 md:flex">
+            <li className="hidden h-full w-auto items-center justify-center pl-2 md:flex">
               <p>Hi, {user?.fullName}! </p>
             </li>
           )}
         </SignedIn>
       </div>
       <div className="nav-center">
-        <Image
-          src={"/icon.png"}
-          alt={""}
-          width={80}
-          height={80}
-          className="h-full w-auto py-2"
-        />
+        <Link href={"/"}>
+          <Image
+            src={"/icon.png"}
+            alt={""}
+            width={80}
+            height={80}
+            className="h-full w-auto py-2"
+          />
+        </Link>
       </div>
       <ul className="nav-right flex h-full w-auto items-center space-x-5">
-        {test !== "/" && (
-          <li className="hidden h-full w-auto items-center justify-center font-semibold md:flex">
-            <Link href={"/home"}>Home</Link>
-          </li>
-        )}
         <SignedIn>
-          <li className="w-auto items-center justify-center font-semibold md:flex">
+          <li className="hidden w-auto items-center justify-center font-semibold md:flex">
             <Link href={"/referral"} className="font-semibold">
               <p>Are you a business? </p>
             </Link>

@@ -10,15 +10,11 @@ import { IApiResponse } from "~/types/apiResponseSchema";
 import { addressSchema } from "~/types/address";
 import geoCode from "~/utils/geo-coding";
 import { prisma } from "~/server/db";
-import { Image, Org, Post } from "@prisma/client";
+import { Post } from "@prisma/client";
 import getOrgId from "~/utils/getOrgId";
+import { PostFull } from "~/types/postFull";
 
-const radius = 0.004
-
-type PostFull = {
-  org: Org,
-  images: Image[],
-} & Post
+const radius = 0.015
 
 export const postRouter = createTRPCRouter({
   signUrl: protectedProcedure

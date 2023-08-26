@@ -4,7 +4,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "~/server/db";
 import { IApiResponse } from "~/types/apiResponseSchema";
 import { ICustomMetadata } from "~/types/customMetadata";
-import { InviteCodes } from "@prisma/client";
+import { Collected } from "@prisma/client";
 
 export const userRouter = createTRPCRouter({
   collected: protectedProcedure
@@ -24,7 +24,7 @@ export const userRouter = createTRPCRouter({
           }
         }
       })
-      return {status: "success", createCollected};
+      return {status: "success", data: createCollected} as IApiResponse<Collected>;
     }),
   joinOrg: protectedProcedure
     .input(z.object({
@@ -44,7 +44,7 @@ export const userRouter = createTRPCRouter({
         }
       })
       if(!!!searchCode){
-        return {status: "unauthorized",} as IApiResponse<null>
+        return {status: "unauthorized",} as IApiResponse<ICustomMetadata>
       }
       await clerkClient.users.updateUserMetadata(ctx.auth.userId, {
         privateMetadata: {
@@ -52,5 +52,15 @@ export const userRouter = createTRPCRouter({
         } as ICustomMetadata
       })
       return {status: "success", data: {orgId: searchCode.code}} as IApiResponse<ICustomMetadata>
+    }),
+  info: protectedProcedure
+    .query(async ({ctx}) => {
+      clerkClient.users.updateUserMetadata(ctx.auth.userId, {
+        privateMetadata: {
+          orgId: "cllrs52vn0000msmtu5blqvl8",
+        } as ICustomMetadata
+      })
+      const data = await clerkClient.users.getUser(ctx.auth.userId)
+      return data
     })
 });

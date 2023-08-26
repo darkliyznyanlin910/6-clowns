@@ -1,5 +1,4 @@
 import MainLayout from "~/components/mainLayout";
-import ListingDetails from "~/components/listingdetials";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 import { InferGetServerSidePropsType } from "next/types";
@@ -23,7 +22,6 @@ const OrgDetails = ({
       <div className="text-2xl font-semibold">
         <h1>Org Details:</h1>
       </div>
-      <ListingDetails />
     </div>
   );
 };

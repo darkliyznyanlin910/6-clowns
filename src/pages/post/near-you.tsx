@@ -1,9 +1,20 @@
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import MainLayout from "~/components/mainLayout";
 import PostPreview from "~/components/postPreview";
 import { api } from "~/utils/api";
 
 export default function Home() {
+  const [lat, setLat] = useState<number>(1.287953);
+  const [lon, setLon] = useState<number>(103.851784);
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition((geo) => {
+      setLat(geo.coords.latitude);
+      setLon(geo.coords.longitude);
+    });
+  }, []);
+
   const {
     data: posts,
     isLoading,
@@ -14,10 +25,13 @@ export default function Home() {
     {
       limit: 10,
       showHistory: false,
+      lat,
+      lon,
     },
     {
       getNextPageParam: (lastPage) =>
         lastPage.status == "success" ? lastPage.data.nextCursor : undefined,
+      enabled: !!lat && !!lon,
     }
   );
   return (
@@ -30,21 +44,17 @@ export default function Home() {
             <>
               <div className="my-4 grid grid-cols-2 gap-4">
                 <div className="col-span-1">
-                  <p className="text-2xl font-semibold">New Posts</p>
-                </div>
-                <div className="col-span-1 justify-self-end">
-                  <Link
-                    href={"/post/near-you"}
-                    className="rounded-xl bg-secondary px-2 py-2 font-semibold text-white"
-                  >
-                    Near you
-                  </Link>
+                  <p className="text-2xl font-semibold">Posts Near You</p>
                 </div>
               </div>
               {posts.pages.flatMap((page) => {
                 if (page.status == "success") {
                   return page.data.getPosts.map((post, index) => (
-                    <PostPreview key={index} post={post} />
+                    <PostPreview
+                      key={index}
+                      post={post}
+                      userCoordinate={{ lat, lon }}
+                    />
                   ));
                 }
               })}

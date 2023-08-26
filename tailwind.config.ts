@@ -3,13 +3,16 @@ import { type Config } from "tailwindcss";
 export default {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {
-      colors:{
-        "btn-red":"#ff5631",
-        "jiak-Red":"#ff5631",
-        "jiak-peach": "#fff0E3"
-      }
-    },
+    extend: {},
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography"), require("daisyui")],
+  daisyui: {
+    themes: [{
+      light: {
+        ...require("daisyui/src/colors/themes")["[data-theme=dark]"],
+        "JRed":"#ff5631",
+        "JPeach": "#fff0E3"
+      },
+    },],
+  },
 } satisfies Config;
