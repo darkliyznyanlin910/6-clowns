@@ -4,10 +4,10 @@ import { clerkClient } from "@clerk/nextjs/server";
 
 import crypto from "crypto";
 import { 
-  S3Client, 
+  // S3Client, 
   PutObjectCommand 
 } from "@aws-sdk/client-s3";
-// import { s3 } from "~/utils/s3";
+import { s3 } from "~/utils/s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { IApiResponse } from "~/types/apiResponseSchema";
 import { addressSchema } from "~/types/address";
@@ -35,7 +35,7 @@ export const postRouter = createTRPCRouter({
           return { status: "unauthorized" } as IApiResponse<{signedUrls: string[], sources: string[]}>
         }
       }
-      const s3 = new S3Client()
+      // const s3 = new S3Client()
       const urls = await Promise.all(input.imageTypes.map(async (imageType) => {
         const key = `postImages/${id}-${crypto.randomUUID()}`
         const command = new PutObjectCommand({
@@ -44,8 +44,8 @@ export const postRouter = createTRPCRouter({
           Bucket: env.BUCKET_NAME,  
           ContentType: imageType,
         });
-        const signedUrl = await getSignedUrl(s3, command);
-        // const signedUrl = await s3.getSignedUrlPromise("putObject", command);
+        // const signedUrl = await getSignedUrl(s3, command);
+        const signedUrl = await s3.getSignedUrlPromise("putObject", command);
         const source = `https://${env.BUCKET_NAME}.s3.ap-southeast-1.amazonaws.com/${key}}`;
         return {signedUrl, source}
       }))
