@@ -38,14 +38,20 @@ export const postRouter = createTRPCRouter({
       // const s3 = new S3Client()
       const urls = await Promise.all(input.imageTypes.map(async (imageType) => {
         const key = `postImages/${id}-${crypto.randomUUID()}`
-        const command = new PutObjectCommand({
+        // const command = new PutObjectCommand({
+        //   ACL: "public-read",
+        //   Key: key,
+        //   Bucket: env.BUCKET_NAME,  
+        //   ContentType: imageType,
+        // });
+        const params = {
           ACL: "public-read",
           Key: key,
           Bucket: env.BUCKET_NAME,  
           ContentType: imageType,
-        });
+        };
         // const signedUrl = await getSignedUrl(s3, command);
-        const signedUrl = await s3.getSignedUrlPromise("putObject", command);
+        const signedUrl = await s3.getSignedUrlPromise("putObject", params);
         const source = `https://${env.BUCKET_NAME}.s3.ap-southeast-1.amazonaws.com/${key}}`;
         return {signedUrl, source}
       }))
