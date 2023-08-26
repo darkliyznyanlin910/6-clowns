@@ -1,5 +1,5 @@
 import { Upload } from "lucide-react";
-import React, { ComponentPropsWithRef } from "react";
+import React, { type ComponentPropsWithRef } from "react";
 
 type Props = ComponentPropsWithRef<"input"> & {
   count: number;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import MainLayout from "~/components/mainLayout";
 import PostPreview from "~/components/postPreview";
+import type { IAddress } from "~/types/address";
 import { api } from "~/utils/api";
 
 export default function Home() {
@@ -44,7 +45,12 @@ export default function Home() {
               {posts.pages.flatMap((page) => {
                 if (page.status == "success") {
                   return page.data.getPosts.map((post, index) => (
-                    <PostPreview key={index} post={post} />
+                    <PostPreview
+                      key={index}
+                      post={post}
+                      address={post.address as IAddress}
+                      userCoordinate={null}
+                    />
                   ));
                 }
               })}

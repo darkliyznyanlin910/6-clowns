@@ -3,6 +3,7 @@ import Link from "next/link";
 import MainLayout from "~/components/mainLayout";
 import PostPreview from "~/components/postPreview";
 import { api } from "~/utils/api";
+import { IAddress } from "~/types/address";
 
 export default function Home() {
   const [lat, setLat] = useState<number>(1.287953);
@@ -53,6 +54,7 @@ export default function Home() {
                     <PostPreview
                       key={index}
                       post={post}
+                      address={post.address as IAddress}
                       userCoordinate={{ lat, lon }}
                     />
                   ));

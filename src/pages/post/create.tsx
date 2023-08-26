@@ -1,25 +1,26 @@
-import MainLayout from "~/components/mainLayout";
+import MainLayout, { OrgContext } from "~/components/mainLayout";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import MultiFileSelector from "~/components/multiFileSelector";
 import ImagePreview from "~/components/imagePreview";
 import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 
 const CreatePost = () => {
   const router = useRouter();
+
+  const { user } = useUser();
+  const org = useContext(OrgContext);
 
   const [submitting, setSubmitting] = useState<boolean>(false);
   const { mutateAsync: createPost } = api.post.create.useMutation({
     onSettled() {
       setSubmitting(false);
     },
-  });
-
-  const { data } = api.user.getOrg.useQuery(undefined, {
-    enabled: false,
   });
   const { mutateAsync: signUrl } = api.post.signUrl.useMutation({
     onSettled(res) {
@@ -39,16 +40,17 @@ const CreatePost = () => {
           })
         );
         createPost({
-          postAs: "org",
-          description: "",
+          postAs,
+          description,
           images: res.data.sources,
-          quantity: 0,
+          quantity,
           address: {
-            line1: "string",
-            unitNo: "string",
-            postal_code: "string",
+            line1,
+            line2,
+            unitNo,
+            postal_code,
           },
-          bestBefore: new Date(),
+          bestBefore,
         });
       }
     },
@@ -56,9 +58,13 @@ const CreatePost = () => {
 
   const [images, setImages] = useState<{ file: File; id: string }[]>([]);
   const [description, setDescription] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
-  const [bestBefore, setBestBefore] = useState<Date>();
-  const [quantity, setQuantity] = useState<number>();
+  const [line1, setLine1] = useState<string>("");
+  const [line2, setLine2] = useState<string>("");
+  const [unitNo, setUnitNo] = useState<string>("");
+  const [postal_code, setPostal_code] = useState<string>("");
+  const [bestBefore, setBestBefore] = useState<Date>(new Date());
+  const [quantity, setQuantity] = useState<number>(0);
+  const [postAs, setPostAs] = useState<"user" | "org">("user");
 
   const HandleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -71,7 +77,7 @@ const CreatePost = () => {
     setSubmitting(true);
     signUrl({
       imageTypes: images.map((image) => image.file.type),
-      postAs: "org",
+      postAs,
     });
   };
 
@@ -96,35 +102,37 @@ const CreatePost = () => {
             </div>
             <div className="col-span-1 md:col-span-2">
               <div>
-                <select className="select select-bordered mt-2  w-full rounded-3xl">
-                  <option disabled selected>
-                    Users' Name or Organisation Name
-                  </option>
-                  <option>User</option>
-                  <option>Org</option>
+                <select
+                  className="select select-bordered select-sm mt-4 w-full rounded-3xl"
+                  onChange={(e) =>
+                    setPostAs(e.target.value == "user" ? "user" : "org")
+                  }
+                >
+                  <option value={"user"}>Post as {user?.fullName}</option>
+                  <option value={"org"}>Post as {org?.name}</option>
                 </select>
                 <input
                   type="text"
                   placeholder="Address line 1"
                   className="input input-bordered input-sm mt-2 w-full rounded-3xl"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  value={line1}
+                  onChange={(e) => setLine1(e.target.value)}
                 />
                 <input
                   type="text"
                   placeholder="Address line 2"
                   className="input input-bordered input-sm mt-2 w-full rounded-3xl"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  value={line2}
+                  onChange={(e) => setLine2(e.target.value)}
                 />
-                <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="col-span-1">
                     <input
                       type="text"
                       placeholder="Unit No"
                       className="input input-bordered input-sm mt-2 w-full rounded-3xl"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      value={unitNo}
+                      onChange={(e) => setUnitNo(e.target.value)}
                     />
                   </div>
                   <div className="col-span-1">
@@ -132,8 +140,8 @@ const CreatePost = () => {
                       type="text"
                       placeholder="Postal code"
                       className="input input-bordered input-sm mt-2 w-full rounded-3xl"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      value={postal_code}
+                      onChange={(e) => setPostal_code(e.target.value)}
                     />
                   </div>
                 </div>
@@ -145,11 +153,11 @@ const CreatePost = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
-                <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className=" grid grid-cols-2 gap-2">
                   <div className="col-span-1">
                     <DatePicker
                       placeholderText="Best Before"
-                      className="input input-bordered input-sm mt-2 block w-full rounded-3xl"
+                      className="input input-bordered input-sm w-full rounded-3xl"
                       selected={bestBefore}
                       onChange={(date) => {
                         setBestBefore(date ?? new Date());
@@ -165,7 +173,7 @@ const CreatePost = () => {
                     <input
                       type="number"
                       placeholder="Quantity"
-                      className="input input-bordered input-sm mt-2 w-full rounded-3xl"
+                      className="input input-bordered input-sm w-full rounded-3xl"
                       value={quantity}
                       onChange={(e) => setQuantity(Number(e.target.value))}
                     />

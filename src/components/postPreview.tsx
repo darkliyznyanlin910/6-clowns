@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import TimeAgo from "react-timeago";
-import { PostFull } from "~/types/postFull";
-import { IAddress } from "~/types/address";
+import type { PostFull } from "~/types/postFull";
+import type { IAddress } from "~/types/address";
 import { useState } from "react";
 import { calculateDistance } from "~/utils/calculateDistance";
 
@@ -21,7 +21,7 @@ const PostPreview = ({ post, userCoordinate, address }: Props) => {
     <div className="card-compact card mx-auto bg-base-100 shadow-xl md:card-side">
       <figure className="w-full md:w-1/3">
         <Image
-          src={post.images[0]?.url!}
+          src={post.images[0]?.url ?? "/icon.png"}
           alt={"test"}
           width={400}
           height={400}
@@ -63,7 +63,14 @@ const PostPreview = ({ post, userCoordinate, address }: Props) => {
         {details && (
           <p>
             Location:
-            {address.line1 + ", " + address.unitNo + ", " + address.postal_code}
+            {" " +
+              address.line1 +
+              ", " +
+              address.line2 +
+              ", " +
+              address.unitNo +
+              ", " +
+              address.postal_code}
             <br />
             Quantity: {post.quantity} <br />
           </p>
@@ -77,12 +84,14 @@ const PostPreview = ({ post, userCoordinate, address }: Props) => {
             >
               {details ? "Hide" : "Details"}
             </button>
-            <Link
-              href={`/post/collect/${post.id}`}
-              className="btn btn-secondary mt-2"
-            >
-              Jiak!
-            </Link>
+            {!!post.org && (
+              <Link
+                href={`/post/collect/${post.id}`}
+                className="btn btn-secondary mt-2"
+              >
+                Jiak!
+              </Link>
+            )}
           </div>
         </div>
       </div>

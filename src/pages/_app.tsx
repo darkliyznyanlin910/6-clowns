@@ -1,9 +1,9 @@
-import { AppProps, type AppType } from "next/app";
+import type { AppProps, AppType } from "next/app";
 import { api } from "~/utils/api";
 import "~/styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { NextPage } from "next/types";
-import { ReactElement, ReactNode } from "react";
+import type { NextPage } from "next/types";
+import type { ReactElement, ReactNode } from "react";
 import { Header } from "~/components/header";
 
 type NextPageWithLayout = NextPage & {
