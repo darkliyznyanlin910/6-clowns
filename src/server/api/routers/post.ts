@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { clerkClient } from "@clerk/nextjs/server";
 
 import crypto from "crypto";
-import { Bucket } from "sst/node/bucket";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { IApiResponse } from "~/types/apiResponseSchema";
@@ -13,6 +12,7 @@ import { prisma } from "~/server/db";
 import { Post } from "@prisma/client";
 import getOrgId from "~/utils/getOrgId";
 import { PostFull } from "~/types/postFull";
+import { env } from "~/env.mjs";
 
 const radius = 0.015
 
@@ -37,11 +37,11 @@ export const postRouter = createTRPCRouter({
         const command = new PutObjectCommand({
           ACL: "public-read",
           Key: key,
-          Bucket: Bucket.public.bucketName,
+          Bucket: env.BUCKET_NAME,
           ContentType: imageType,
         });
         const signedUrl = await getSignedUrl(s3, command);
-        const source = `https://${Bucket.public.bucketName}.s3.ap-southeast-1.amazonaws.com/${key}}`;
+        const source = `https://${env.BUCKET_NAME}.s3.ap-southeast-1.amazonaws.com/${key}}`;
         return {signedUrl, source}
       }))
       const data: {
