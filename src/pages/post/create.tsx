@@ -29,7 +29,7 @@ const CreatePost = () => {
           res.data.signedUrls.map(async (signedUrl, index) => {
             axios.put(
               signedUrl,
-              images[index], //should be file
+              images[index]?.file, //should be file
               {
                 headers: {
                   ContentType: images[index]?.file.type!,

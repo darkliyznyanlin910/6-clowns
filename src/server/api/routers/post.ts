@@ -52,7 +52,7 @@ export const postRouter = createTRPCRouter({
         };
         // const signedUrl = await getSignedUrl(s3, command);
         const signedUrl = await s3.getSignedUrlPromise("putObject", params);
-        const source = `https://${env.BUCKET_NAME}.s3.ap-southeast-1.amazonaws.com/${key}}`;
+        const source = `https://${env.BUCKET_NAME}.s3.ap-southeast-1.amazonaws.com/${key}`;
         return {signedUrl, source}
       }))
       const data: {
