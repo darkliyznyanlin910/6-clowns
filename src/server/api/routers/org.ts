@@ -27,7 +27,7 @@ export const orgRouter = createTRPCRouter({
       createdAt: z.date(),
     }))
     .query(async ({input}) => {
-      const hash2 = await hash(input.createdAt.toISOString());
+      const hash2 = await hash(input.orgName);
       return `${input.orgName}+${hash2}`
     })
 })
