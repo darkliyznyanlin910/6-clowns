@@ -23,11 +23,11 @@ export const orgRouter = createTRPCRouter({
     }),
   qrStringGenerator: protectedProcedure
     .input(z.object({
+      orgId: z.string(),
       orgName: z.string(),
-      createdAt: z.date(),
     }))
     .query(async ({input}) => {
       const hash2 = await hash(input.orgName);
-      return `${input.orgName}+${hash2}`
+      return `${input.orgId}~!@#$%${hash2}`
     })
 })

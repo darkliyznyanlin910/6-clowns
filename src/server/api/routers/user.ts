@@ -5,14 +5,14 @@ import { prisma } from "~/server/db";
 import type { IApiResponse } from "~/types/apiResponseSchema";
 import type { ICustomMetadata } from "~/types/customMetadata";
 import type { Collected, Org } from "@prisma/client";
-import { hash, verify } from "argon2";
+import { verify } from "argon2";
 
 export const userRouter = createTRPCRouter({
   collect: protectedProcedure
     .input(z.object({ 
       postId: z.string(),
       orgId: z.string(),
-      hash: z.string(),
+      hash: z.any(),
       quantity: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -25,10 +25,8 @@ export const userRouter = createTRPCRouter({
         return {status: "error"} as IApiResponse<Collected>;
       }
       const check = await verify(input.hash,findOrg.name)
-      const test = await hash(findOrg.name)
-      console.log(test, input.hash)
-      console.log(input.orgId, findOrg.id)
-      if(check){
+
+      if(!check){
         return {status: "unauthorized"} as IApiResponse<Collected>;
       }
       await prisma.post.update({

@@ -63,9 +63,9 @@ const PostDetails = ({
     setSubmitting(true);
     await collect({
       quantity,
-      orgId: scannedResult.split("+")[0]!,
+      orgId: scannedResult.split("~!@#$%")[0]!,
       postId: id,
-      hash: scannedResult.split("+")[1]!,
+      hash: scannedResult.split("~!@#$%")[1]!,
     });
   };
   return (
@@ -107,7 +107,6 @@ const PostDetails = ({
                     &gt;
                   </button>
                 </div>
-                {/* <p>{scannedResult}</p> */}
                 <div className="mt-4 flex justify-between">
                   <Link href={"/"} className="btn btn-neutral rounded-2xl">
                     Back

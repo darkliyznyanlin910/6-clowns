@@ -24,12 +24,14 @@ const PostDetails = () => {
   const { data, isLoading } = api.org.qrStringGenerator.useQuery(
     {
       orgName: org?.name!,
-      createdAt: org?.createdAt!,
+      orgId: org?.id!,
     },
     {
       enabled: Boolean(isLoaded && !!user && org),
     }
   );
+
+  console.log(data?.split("~!@#$%"));
 
   return (
     <div className="flex justify-center">
