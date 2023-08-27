@@ -89,14 +89,25 @@ const PostDetails = ({
             ) : (
               <div className="w-full rounded-3xl bg-white p-4 md:p-6 lg:p-8">
                 <p className="font-semibold">Quantity collected:</p>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="Quantity"
-                  className="input input-bordered input-sm mt-4  w-full rounded-3xl"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))}
-                />
+                <div className="inline-flex w-full justify-between">
+                  <button
+                    className="rounded-3xl bg-secondary px-2 py-1 text-white"
+                    type="button"
+                    onClick={() => setQuantity((quantity) => quantity - 1)}
+                    disabled={quantity == 0}
+                  >
+                    &lt;
+                  </button>
+                  <p className="text-center">{quantity}</p>
+                  <button
+                    className="rounded-3xl bg-secondary px-2 py-1 text-white"
+                    type="button"
+                    onClick={() => setQuantity((quantity) => quantity + 1)}
+                  >
+                    &gt;
+                  </button>
+                </div>
+                <p>{scannedResult}</p>
                 <div className="mt-4 flex justify-between">
                   <Link href={"/"} className="btn btn-neutral rounded-2xl">
                     Back
