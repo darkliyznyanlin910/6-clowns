@@ -107,7 +107,7 @@ const PostDetails = ({
                     &gt;
                   </button>
                 </div>
-                <p>{scannedResult}</p>
+                {/* <p>{scannedResult}</p> */}
                 <div className="mt-4 flex justify-between">
                   <Link href={"/"} className="btn btn-neutral rounded-2xl">
                     Back
