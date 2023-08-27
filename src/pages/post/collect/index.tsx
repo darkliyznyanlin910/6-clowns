@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import Webcam from "react-webcam";
-import { useEffect } from "react";
 
 //using react-webcam lib
 const CollectPage = () => {
@@ -28,13 +27,15 @@ const CollectPage = () => {
 
   return (
     <div>
-      <div className=" flex justify-center">
-        <div className="text-2xl font-semibold">
-          <h2 className="text-center">QR Code Scanner</h2>
+      <div className="mt-1 flex justify-center">
+        <div>
+          <h2 className="text-center text-2xl font-semibold">
+            QR Code Scanner
+          </h2>
           <Webcam
             ref={webcamRef}
             audio={false}
-            mirrored={false}
+            mirrored={true}
             onUserMedia={() => handleScan()}
           />
           {scannedResult && <p>Scanned Result: {scannedResult}</p>}

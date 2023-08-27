@@ -2,11 +2,10 @@ import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
-  publicProcedure,
 } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
-import { IApiResponse } from "~/types/apiResponseSchema";
-import { Review } from "@prisma/client";
+import type { IApiResponse } from "~/types/apiResponseSchema";
+import type { Review } from "@prisma/client";
 
 export const reviewRouter = createTRPCRouter({
   create: protectedProcedure

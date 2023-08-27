@@ -1,29 +1,46 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "~/server/db";
-import { IApiResponse } from "~/types/apiResponseSchema";
-import { ICustomMetadata } from "~/types/customMetadata";
-import { Collected, Org } from "@prisma/client";
+import type { IApiResponse } from "~/types/apiResponseSchema";
+import type { ICustomMetadata } from "~/types/customMetadata";
+import type { Collected, Org } from "@prisma/client";
 import { hash, verify } from "argon2";
 
 export const userRouter = createTRPCRouter({
-  collected: protectedProcedure
+  collect: protectedProcedure
     .input(z.object({ 
       postId: z.string(),
       orgId: z.string(),
       hash: z.string(),
       quantity: z.number(),
     }))
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const findOrg = await prisma.org.findFirst({
         where: {
           id: input.orgId,
         }
       })
-      if(!!!findOrg || await verify(input.hash,findOrg.createdAt.toDateString())) {
+      if(!!!findOrg) {
         return {status: "error"} as IApiResponse<Collected>;
       }
+      const check = await verify(input.hash,findOrg.name)
+      const test = await hash(findOrg.name)
+      console.log(test, input.hash)
+      console.log(input.orgId, findOrg.id)
+      if(check){
+        return {status: "unauthorized"} as IApiResponse<Collected>;
+      }
+      await prisma.post.update({
+        where: {
+          id: input.postId
+        },
+        data: {
+          quantity: {
+            decrement: input.quantity
+          }
+        }
+      })
       const createCollected = await prisma.collected.create({
         data: {
           quantity: input.quantity,
@@ -32,16 +49,6 @@ export const userRouter = createTRPCRouter({
             connect: {
               id: input.postId
             }
-          }
-        }
-      })
-      const reduceQuantity = await prisma.post.update({
-        where: {
-          id: input.postId
-        },
-        data: {
-          quantity: {
-            decrement: input.quantity
           }
         }
       })

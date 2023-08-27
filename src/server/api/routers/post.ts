@@ -1,21 +1,15 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { clerkClient } from "@clerk/nextjs/server";
-
 import crypto from "crypto";
-import { 
-  // S3Client, 
-  PutObjectCommand 
-} from "@aws-sdk/client-s3";
 import { s3 } from "~/utils/s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { IApiResponse } from "~/types/apiResponseSchema";
+import type { IApiResponse } from "~/types/apiResponseSchema";
 import { addressSchema } from "~/types/address";
 import geoCode from "~/utils/geo-coding";
 import { prisma } from "~/server/db";
-import { Post } from "@prisma/client";
+import type { Post } from "@prisma/client";
 import getOrgId from "~/utils/getOrgId";
-import { PostFull } from "~/types/postFull";
+import type { PostFull } from "~/types/postFull";
 import { env } from "~/env.mjs";
 
 const radius = 0.015
@@ -151,7 +145,8 @@ export const postRouter = createTRPCRouter({
           },
           quantity: (input.showHistory ? undefined : {
             gt: 0,
-          })
+          }),
+          orgId: input.orgId
         },
         include: {
           images: true,

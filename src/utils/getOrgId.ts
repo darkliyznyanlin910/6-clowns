@@ -1,5 +1,5 @@
 import { clerkClient } from "@clerk/nextjs"
-import { ICustomMetadata } from "~/types/customMetadata"
+import type { ICustomMetadata } from "~/types/customMetadata"
 
 const getOrgId = async (userId: string) => {
   const {publicMetadata} = await clerkClient.users.getUser(userId)

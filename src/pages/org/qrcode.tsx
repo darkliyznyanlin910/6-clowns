@@ -1,10 +1,9 @@
 import MainLayout, { OrgContext } from "~/components/mainLayout";
 import { useRouter } from "next/router";
 import React, { useContext, useEffect } from "react";
-import QRCode from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
 import { useUser } from "@clerk/nextjs";
 import type { ICustomMetadata } from "~/types/customMetadata";
-import { hash } from "argon2";
 import { api } from "~/utils/api";
 
 const PostDetails = () => {
@@ -14,37 +13,33 @@ const PostDetails = () => {
   const org = useContext(OrgContext);
 
   useEffect(() => {
-    if (isLoaded && !!user) {
+    if (isLoaded && !!user && org) {
       const { orgId } = user.publicMetadata as ICustomMetadata;
       if (orgId !== org?.id) {
         router.push("/403");
       }
     }
-    if (!!!org) {
-      router.push("/404");
-    }
   }, [isLoaded]);
 
-  const { data } = api.org.qrStringGenerator.useQuery(
+  const { data, isLoading } = api.org.qrStringGenerator.useQuery(
     {
-      orgId: org?.id!,
+      orgName: org?.name!,
       createdAt: org?.createdAt!,
     },
     {
-      enabled: Boolean(org),
+      enabled: Boolean(isLoaded && !!user && org),
     }
   );
-  const hash2 = "test";
-  // await hash(org?.createdAt.toDateString()!);
 
   return (
-    <div>
-      <div className="text-2xl font-semibold">
-        <h1>Listings Details:</h1>
-      </div>
+    <div className="flex justify-center">
       <div>
-        <h1>User QR Code Generator</h1>
-        {org && <QRCode value={`${org.id}+${hash2}`} />}
+        <div className="text-2xl font-semibold">
+          <h1>QR for {org?.name}</h1>
+        </div>
+        {!isLoading && (
+          <QRCodeCanvas value={data ?? ""} className="w-3/4" size={360} />
+        )}
       </div>
     </div>
   );

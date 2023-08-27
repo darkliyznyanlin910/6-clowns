@@ -1,25 +1,51 @@
 import MainLayout, { OrgContext } from "~/components/mainLayout";
 import { api } from "~/utils/api";
-import { useRouter } from "next/router";
 import axios from "axios";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import MultiFileSelector from "~/components/multiFileSelector";
 import ImagePreview from "~/components/imagePreview";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import type { IAlert } from "~/types/alert";
+import CustomAlert from "~/components/alert";
+import type { ICustomMetadata } from "~/types/customMetadata";
 
 const CreatePost = () => {
-  const router = useRouter();
-
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const org = useContext(OrgContext);
+  const [orgId, setOrgId] = useState<string>();
+
+  useEffect(() => {
+    if (isLoaded && !!user) {
+      const { orgId: data } = user.publicMetadata as ICustomMetadata;
+      setOrgId(data);
+    }
+  }, [isLoaded]);
+
+  const [alert, setAlert] = useState<IAlert>({
+    set: false,
+    status: "neutral",
+    message: "",
+  });
 
   const [submitting, setSubmitting] = useState<boolean>(false);
   const { mutateAsync: createPost } = api.post.create.useMutation({
     onSettled() {
       setSubmitting(false);
+      setAlert({
+        set: true,
+        status: "success",
+        message: `Post successfully created.`,
+      });
+    },
+    onError() {
+      setAlert({
+        set: true,
+        status: "error",
+        message: `Post creation failed.`,
+      });
     },
   });
   const { mutateAsync: signUrl } = api.post.signUrl.useMutation({
@@ -38,19 +64,46 @@ const CreatePost = () => {
               }
             );
           })
-        );
-        createPost({
-          postAs,
-          description,
-          images: res.data.sources,
-          quantity,
-          address: {
-            line1,
-            line2,
-            unitNo,
-            postal_code,
-          },
-          bestBefore,
+        )
+          .then(() => {
+            createPost({
+              postAs,
+              description,
+              images: res.data.sources,
+              quantity,
+              address: {
+                line1,
+                line2,
+                unitNo,
+                postal_code,
+              },
+              bestBefore,
+            });
+          })
+          .then(() => {
+            // Reset the form data after createPost is successful
+            setImages([]);
+            setDescription("");
+            setLine1("");
+            setLine2("");
+            setUnitNo("");
+            setPostal_code("");
+            setBestBefore(new Date());
+            setQuantity(0);
+            setPostAs("user");
+          })
+          .catch(() => {
+            setAlert({
+              set: true,
+              status: "error",
+              message: `Image upload failed.`,
+            });
+          });
+      } else {
+        setAlert({
+          set: true,
+          status: "error",
+          message: ``,
         });
       }
     },
@@ -75,6 +128,11 @@ const CreatePost = () => {
 
   const HandleSubmit = () => {
     setSubmitting(true);
+    setAlert({
+      set: true,
+      status: "neutral",
+      message: `Uploading Images...`,
+    });
     signUrl({
       imageTypes: images.map((image) => image.file.type),
       postAs,
@@ -88,6 +146,9 @@ const CreatePost = () => {
 
   return (
     <div>
+      <div className="mb-2">
+        <CustomAlert alert={alert} />
+      </div>
       <div className="rounded-3xl bg-white p-4 md:p-6 lg:p-8">
         <div className="text-3xl font-semibold">
           <h1 className="text-center">Create New Post</h1>
@@ -102,15 +163,17 @@ const CreatePost = () => {
             </div>
             <div className="col-span-1 md:col-span-2">
               <div>
-                <select
-                  className="select select-bordered select-sm mt-4 w-full rounded-3xl"
-                  onChange={(e) =>
-                    setPostAs(e.target.value == "user" ? "user" : "org")
-                  }
-                >
-                  <option value={"user"}>Post as {user?.fullName}</option>
-                  <option value={"org"}>Post as {org?.name}</option>
-                </select>
+                {!!org && orgId == org.id && (
+                  <select
+                    className="select select-bordered select-sm mt-4 w-full rounded-3xl"
+                    onChange={(e) =>
+                      setPostAs(e.target.value == "user" ? "user" : "org")
+                    }
+                  >
+                    <option value={"user"}>Post as {user?.fullName}</option>
+                    <option value={"org"}>Post as {org?.name}</option>
+                  </select>
+                )}
                 <input
                   type="text"
                   placeholder="Address line 1"
@@ -206,6 +269,3 @@ export default CreatePost;
 CreatePost.getLayout = function getLayout(page: React.ReactElement) {
   return <MainLayout>{page}</MainLayout>;
 };
-function setData(updatedData: { file: File; id: string }[]) {
-  throw new Error("Function not implemented.");
-}

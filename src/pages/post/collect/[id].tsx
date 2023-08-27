@@ -1,43 +1,118 @@
 import MainLayout from "~/components/mainLayout";
-import PostPreview from "~/components/postPreview";
 import { api } from "~/utils/api";
-import { useRouter } from "next/router";
-import { InferGetServerSidePropsType } from "next/types";
-import React, { useState } from "react";
-import QRCode from "qrcode.react";
+import type { InferGetServerSidePropsType } from "next/types";
+import React, { useRef, useState } from "react";
+import { BrowserMultiFormatReader } from "@zxing/library";
+import Webcam from "react-webcam";
+import CustomAlert from "~/components/alert";
+import type { IAlert } from "~/types/alert";
+import Link from "next/link";
 
 const PostDetails = ({
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const router = useRouter();
-
-  const userData = JSON.stringify({});
-
-  const { data: org } = api.user.getOrg.useQuery();
-
-  const { data: post, isLoading } = api.post.getOne.useQuery(
-    {
-      postId: id,
+  const { mutateAsync: collect } = api.user.collect.useMutation({
+    onSettled(res) {
+      setSubmitting(false);
+      if (res?.status == "success") {
+        setAlert({
+          set: true,
+          status: "success",
+          message: "Collection successful",
+        });
+        setQuantity(0);
+      } else {
+        setAlert({
+          set: true,
+          status: "error",
+          message: "Collection failed",
+        });
+      }
     },
-    {
-      enabled: Boolean(id),
+  });
+
+  const webcamRef = useRef<Webcam>(null);
+  const [scannedResult, setScannedResult] = useState("");
+  const [quantity, setQuantity] = useState<number>(0);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [alert, setAlert] = useState<IAlert>({
+    set: false,
+    status: "neutral",
+    message: "",
+  });
+
+  const handleScan = async () => {
+    const webcam = webcamRef.current;
+    const codeReader = new BrowserMultiFormatReader();
+
+    try {
+      const result = await codeReader.decodeFromInputVideoDevice(
+        undefined,
+        webcam?.video!
+      );
+
+      if (result) {
+        setScannedResult(result.getText());
+      }
+    } catch (error) {
+      console.error(error);
     }
-  );
+  };
 
+  const HandleSubmit = async () => {
+    setSubmitting(true);
+    await collect({
+      quantity,
+      orgId: scannedResult.split("+")[0]!,
+      postId: id,
+      hash: scannedResult.split("+")[1]!,
+    });
+  };
   return (
-    <div>
-      <div className=" flex justify-center">
-        <div className="text-2xl font-semibold">
-          <h1>QR code</h1>
+    <div className="flex justify-center">
+      <div>
+        <div className="mb-2">
+          <CustomAlert alert={alert} />
         </div>
-        <div className="ml-5">
-          <QRCode value="12345" />
-        </div>
-      </div>
-
-      <div className=" flex justify-center">
-        <div className="text-2xl font-semibold">
-          <h1>QR Scanner</h1>
+        <div className=" justify-center text-2xl font-semibold">
+          <div className="mt-4">
+            {scannedResult.length == 0 ? (
+              <div>
+                <h1>Scan QR code</h1>
+                <Webcam
+                  ref={webcamRef}
+                  audio={false}
+                  mirrored={true}
+                  onUserMedia={() => handleScan()}
+                />
+              </div>
+            ) : (
+              <div className="w-full rounded-3xl bg-white p-4 md:p-6 lg:p-8">
+                <p className="font-semibold">Quantity collected:</p>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Quantity"
+                  className="input input-bordered input-sm mt-4  w-full rounded-3xl"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                />
+                <div className="mt-4 flex justify-between">
+                  <Link href={"/"} className="btn btn-neutral rounded-2xl">
+                    Back
+                  </Link>
+                  <button
+                    type="button"
+                    className="btn btn-secondary rounded-2xl"
+                    onClick={HandleSubmit}
+                    disabled={submitting}
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

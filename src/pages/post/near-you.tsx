@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import MainLayout from "~/components/mainLayout";
 import PostPreview from "~/components/postPreview";
 import { api } from "~/utils/api";
-import { IAddress } from "~/types/address";
+import type { IAddress } from "~/types/address";
 
 export default function Home() {
   const [lat, setLat] = useState<number>(1.287953);
@@ -50,9 +49,9 @@ export default function Home() {
               </div>
               {posts.pages.flatMap((page) => {
                 if (page.status == "success") {
-                  return page.data.getPosts.map((post, index) => (
+                  return page.data.getPosts.map((post) => (
                     <PostPreview
-                      key={index}
+                      key={post.id}
                       post={post}
                       address={post.address as IAddress}
                       userCoordinate={{ lat, lon }}

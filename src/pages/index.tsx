@@ -44,9 +44,9 @@ export default function Home() {
               </div>
               {posts.pages.flatMap((page) => {
                 if (page.status == "success") {
-                  return page.data.getPosts.map((post, index) => (
+                  return page.data.getPosts.map((post) => (
                     <PostPreview
-                      key={index}
+                      key={post.id}
                       post={post}
                       address={post.address as IAddress}
                       userCoordinate={null}
@@ -54,11 +54,12 @@ export default function Home() {
                   ));
                 }
               })}
-              <div className="self-center">
+              <div className="flex justify-center">
                 {hasNextPage && (
                   <button
                     disabled={isFetchingNextPage}
                     onClick={() => fetchNextPage()}
+                    className="btn btn-secondary btn-wide"
                   >
                     More
                   </button>

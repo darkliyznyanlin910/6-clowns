@@ -40,12 +40,12 @@ const MainLayout = ({ children }: Props) => {
     <OrgContext.Provider value={org}>
       <div className="min-w-screen flex min-h-screen flex-col bg-primary">
         <Navbar />
-        <main className="mt-16 flex px-4 pt-4">
+        <main className="mt-16 flex flex-1 flex-col px-4 pt-4">
           <div className="container mx-auto mb-4 w-full md:w-3/4 lg:w-2/3">
             {children}
           </div>
         </main>
-        <footer className="border-t-1 absolute bottom-0 flex h-10 w-full items-center justify-center border">
+        <footer className="border-t-1 flex h-10 w-full items-center justify-center border bg-primary">
           <p>Copyright © 2023 Jiak!</p>
         </footer>
       </div>

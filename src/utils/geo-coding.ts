@@ -1,10 +1,10 @@
-import { IAddress } from "~/types/address";
+import type { IAddress } from "~/types/address";
 
 function getRandomCoordinate(min: number, max: number): number {
   return Math.random() * (max - min) + min;
 }
 
-function generateRandomLatLon() {
+function generateRandomLatLon(_address: IAddress) {
   const minLat = 1.23;
   const maxLat = 1.47;
   const minLon = 103.57;
@@ -17,7 +17,7 @@ function generateRandomLatLon() {
 }
 
 const geoCode = (address: IAddress) => {
-  const data = generateRandomLatLon()
+  const data = generateRandomLatLon(address)
   return data
 }
 
