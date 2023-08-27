@@ -1,6 +1,4 @@
-# Create T3 App
-
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+# Jiak!
 
 ## What technologies did we choose?
 
@@ -12,8 +10,13 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 - [tRPC](https://trpc.io)
 - [react-webcam](https://github.com/mozmorris/react-webcam)
 - [qrcode.react](https://github.com/zpao/qrcode.react)
+- [T3 Stack](https://create.t3.gg/) - This project bootstrapped with `create-t3-app`.
 
 ## How do I deploy this?
+
+### To [SST](https://sst.dev/) with CI/CD (Currently haven't implemented yet)
+
+Check `~/.github/workflows/deploy.yml` for workflow.
 
 ### [Vercel](https://create.t3.gg/en/deployment/vercel)
 
@@ -34,7 +37,3 @@ vercel link
 ```console
 vercel deploy --prod
 ```
-
-### To [SST](https://sst.dev/) with CI/CD
-
-Check `~/.github/workflows/deploy.yml` for workflow.
