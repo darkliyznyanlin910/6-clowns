@@ -85,7 +85,7 @@ const Navbar = () => {
             </div>
           </Link>
           {/* <Link href={"/reviews"} className="font-semibold"> */}
-          <div className="rounded-b-xl rounded-l-2xl rounded-r-2xl bg-secondary px-2 py-2 text-white">
+          <div className="btn rounded-b-xl rounded-l-2xl rounded-r-2xl bg-secondary px-2 py-2 text-white">
             Your Reviews
           </div>
           {/* </Link> */}

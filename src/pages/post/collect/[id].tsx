@@ -82,7 +82,7 @@ const PostDetails = ({
                 <Webcam
                   ref={webcamRef}
                   audio={false}
-                  mirrored={true}
+                  mirrored={false}
                   onUserMedia={() => handleScan()}
                 />
               </div>
