@@ -12,7 +12,7 @@ export const userRouter = createTRPCRouter({
     .input(z.object({ 
       postId: z.string(),
       orgId: z.string(),
-      hash: z.any(),
+      hash: z.string(),
       quantity: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
