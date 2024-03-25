@@ -1,5 +1,9 @@
 # Jiak!
 
+## What is `Jiak!`?
+
+Jiak! is an application to tackle food wastage in Singapore by letting users share excess foods that they have with public. It has geo filtering features where users can find food giveaways that are nearest to their location.
+
 ## What technologies did we choose?
 
 - [Next.js](https://nextjs.org)
